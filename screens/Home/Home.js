@@ -28,12 +28,11 @@ const Home = () => {
 
   useEffect(() => {
     setIsLoadingCategories(true);
-    setCategoryList(
-      pagination(categories.categories, categoryPage, categoryPageSize),
-    );
+    const initialList = pagination(categories.categories, 1, categoryPageSize);
+    setCategoryList(initialList);
     setCategoryPage(prev => prev + 1);
     setIsLoadingCategories(false);
-  }, []);
+  }, [categories.categories]);
 
   const pagination = (items, pageNumber, pageSize) => {
     const startIndex = (pageNumber - 1) * pageSize;
