@@ -10,11 +10,9 @@ import style from './style';
 const Search = props => {
   const textInputRef = useRef(null);
   const [search, setSearch] = useState('');
-
   const handleFocus = () => {
     textInputRef.current.focus();
   };
-
   const handleSearch = searchValue => {
     setSearch(searchValue);
     props.onSearch(searchValue);
@@ -27,11 +25,11 @@ const Search = props => {
         size={scaleFontSize(22)}
       />
       <TextInput
+        placeholder={props.placeholder}
         ref={textInputRef}
         style={style.searchInput}
         value={search}
         onChangeText={value => handleSearch(value)}
-        placeholder="Search"
       />
     </Pressable>
   );
@@ -39,10 +37,12 @@ const Search = props => {
 
 Search.defaultProps = {
   onSearch: () => {},
+  placeholder: 'Search',
 };
 
 Search.propTypes = {
   onPress: PropTypes.func,
+  placeholder: PropTypes.string,
 };
 
 export default Search;
