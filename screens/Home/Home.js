@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -21,7 +21,28 @@ const Home = () => {
   const user = useSelector(state => state.user);
   const categories = useSelector(state => state.categories);
   const dispatch = useDispatch();
-  console.log({ User: user, Categories: categories });
+  const [categoryPage, setCategoryPage] = useState(1);
+  const [categoryList, setCategoryList] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const categoryPageSize = 4;
+
+  useEffect(() => {
+    setIsLoadingCategories(true);
+    setCategoryList(
+      pagination(categories.categories, categoryPage, categoryPageSize),
+    );
+    setCategoryPage(prev => prev + 1);
+    setIsLoadingCategories(false);
+  }, []);
+
+  const pagination = (items, pageNumber, pageSize) => {
+    const startIndex = (pageNumber - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    if (startIndex >= items.length) {
+      return [];
+    }
+    return items.slice(startIndex, endIndex);
+  };
   return (
     <SafeAreaView
       style={[
@@ -54,16 +75,42 @@ const Home = () => {
             style={style.highlightedImage}
           />
         </Pressable>
+        <View style={style.categoryHeader}>
+          <Header title={'Select Category'} type={2} />
+        </View>
         <View style={style.categories}>
           <FlatList
+            onEndReachedThreshold={0.5}
+            onEndReached={() => {
+              if (isLoadingCategories) {
+                return;
+              }
+              console.log(
+                'User has reached the end and we are getting more data for page number ',
+                categoryPage,
+              );
+              setIsLoadingCategories(true);
+              let newData = pagination(
+                categories.categories,
+                categoryPage,
+                categoryPageSize,
+              );
+              if (newData.length > 0) {
+                setCategoryList(prevState => [...prevState, ...newData]);
+                setCategoryPage(prevState => prevState + 1);
+              }
+              setIsLoadingCategories(false);
+            }}
             horizontal={true}
             showsHorizontalScrollIndicator={false}
-            data={categories.categories}
+            data={categoryList}
             renderItem={({ item }) => (
               <View style={style.categoryItem} key={item.categoryId}>
                 <Tab
                   tabId={item.categoryId}
-                  OnPress={value => dispatch(updateSelectedCategoryId(value))}
+                  onPress={id =>
+                    dispatch(updateSelectedCategoryId({ categoryId: id }))
+                  }
                   title={item.name}
                   isInactive={item.categoryId !== categories.selectedCategoryId}
                 />
