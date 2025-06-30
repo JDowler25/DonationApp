@@ -17,8 +17,9 @@ import Search from '../../components/Search/Search';
 import Tab from '../../components/Tab/Tab';
 import { updateSelectedCategoryId } from '../../redux/reducers/Categories';
 import SingleDonationItem from '../../components/SingleDonationItem/SingleDonationItem';
+import Routes from '../../navigation/Routes';
 
-const Home = () => {
+const Home = ({ navigation }) => {
   const user = useSelector(state => state.user);
   const categories = useSelector(state => state.categories);
   const donations = useSelector(state => state.donations);
@@ -30,11 +31,12 @@ const Home = () => {
   const categoryPageSize = 4;
 
   useEffect(() => {
+    console.log(categories);
     const items = donations.items.filter(value =>
       value.categoryIds.includes(categories.selectedCategoryId),
     );
     setDonationItems(items);
-  }, [categories.selectedCategoryId]);
+  }, [categories.selectedCategoryId, donations.items]);
 
   useEffect(() => {
     setIsLoadingCategories(true);
@@ -132,14 +134,19 @@ const Home = () => {
             {donationItems.map(value => (
               <View key={value.donationItemId} style={style.singleDonationItem}>
                 <SingleDonationItem
-                  onPress={selectedDonationId => {}}
+                  onPress={selectedDonationId => {
+                    console.log(selectedDonationId);
+                    dispatch(updateSelectedCategoryId(selectedDonationId));
+                    console.log(categories.selectedCategoryId);
+                    navigation.navigate(Routes.SingleDonationItem);
+                  }}
                   donationItemId={value.donationItemId}
                   uri={value.image}
                   donationTitle={value.name}
                   badgeTitle={
-                    categories.categories.filter(
+                    categories.categories.find(
                       val => val.categoryId === categories.selectedCategoryId,
-                    )[0].name
+                    )?.name ?? ''
                   }
                   price={parseFloat(value.price)}
                 />
