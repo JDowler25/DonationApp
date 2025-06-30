@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { horizontalScale } from './scaling';
+import { horizontalScale, verticalScale } from './scaling';
 
 const globalStyle = StyleSheet.create({
   backgroundWhite: {
@@ -9,8 +9,7 @@ const globalStyle = StyleSheet.create({
     flex: 1,
   },
   padding: {
-    paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingVertical: verticalScale(24),
   },
   rowContainer: {
     flexDirection: 'row',
