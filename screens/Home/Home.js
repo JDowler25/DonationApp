@@ -16,8 +16,11 @@ import Header from '../../components/Header/Header';
 import Search from '../../components/Search/Search';
 import Tab from '../../components/Tab/Tab';
 import { updateSelectedCategoryId } from '../../redux/reducers/Categories';
+import { updateSelectedDonationId } from '../../redux/reducers/Donations';
 import SingleDonationItem from '../../components/SingleDonationItem/SingleDonationItem';
 import Routes from '../../navigation/Routes';
+import { resetToInitialState } from '../../redux/reducers/User';
+import { logOut } from '../../api/user';
 
 const Home = ({ navigation }) => {
   const user = useSelector(state => state.user);
@@ -31,7 +34,6 @@ const Home = ({ navigation }) => {
   const categoryPageSize = 4;
 
   useEffect(() => {
-    console.log(categories);
     const items = donations.items.filter(value =>
       value.categoryIds.includes(categories.selectedCategoryId),
     );
@@ -67,14 +69,24 @@ const Home = ({ navigation }) => {
           <View>
             <Text style={style.headerIntroText}>Hello, </Text>
             <View style={style.userName}>
-              <Header title={user.firstName + ' ' + user.lastName[0] + '.👋'} />
+              <Header title={user.displayName + '👋'} />
             </View>
           </View>
-          <Image
-            source={{ uri: user.profileImage }}
-            style={style.profileImage}
-            resizeMode={'contain'}
-          />
+          <View>
+            <Image
+              source={{ uri: user.profileImage }}
+              style={style.profileImage}
+              resizeMode={'contain'}
+            />
+            <Pressable
+              onPress={async () => {
+                dispatch(resetToInitialState());
+                await logOut();
+              }}
+            >
+              <Header type={3} title={'Logout'} color={'#156CF7'} />
+            </Pressable>
+          </View>
         </View>
         <View style={style.searchBox}>
           <Search placeholder={'Search'} />
@@ -96,10 +108,6 @@ const Home = ({ navigation }) => {
               if (isLoadingCategories) {
                 return;
               }
-              console.log(
-                'User has reached the end and we are getting more data for page number ',
-                categoryPage,
-              );
               setIsLoadingCategories(true);
               let newData = pagination(
                 categories.categories,
@@ -131,27 +139,31 @@ const Home = ({ navigation }) => {
         </View>
         {donationItems.length > 0 && (
           <View style={style.donationItemsContainer}>
-            {donationItems.map(value => (
-              <View key={value.donationItemId} style={style.singleDonationItem}>
-                <SingleDonationItem
-                  onPress={selectedDonationId => {
-                    console.log(selectedDonationId);
-                    dispatch(updateSelectedCategoryId(selectedDonationId));
-                    console.log(categories.selectedCategoryId);
-                    navigation.navigate(Routes.SingleDonationItem);
-                  }}
-                  donationItemId={value.donationItemId}
-                  uri={value.image}
-                  donationTitle={value.name}
-                  badgeTitle={
-                    categories.categories.find(
-                      val => val.categoryId === categories.selectedCategoryId,
-                    )?.name ?? ''
-                  }
-                  price={parseFloat(value.price)}
-                />
-              </View>
-            ))}
+            {donationItems.map(value => {
+              const categoryInformation = categories.categories.find(
+                val => val.categoryId === categories.selectedCategoryId,
+              );
+              return (
+                <View
+                  key={value.donationItemId}
+                  style={style.singleDonationItem}
+                >
+                  <SingleDonationItem
+                    onPress={selectedDonationId => {
+                      dispatch(updateSelectedDonationId(selectedDonationId));
+                      navigation.navigate(Routes.SingleDonationItem, {
+                        categoryInformation,
+                      });
+                    }}
+                    donationItemId={value.donationItemId}
+                    uri={value.image}
+                    donationTitle={value.name}
+                    badgeTitle={categoryInformation.name}
+                    price={parseFloat(value.price)}
+                  />
+                </View>
+              );
+            })}
           </View>
         )}
       </ScrollView>

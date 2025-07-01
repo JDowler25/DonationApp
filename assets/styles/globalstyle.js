@@ -16,6 +16,9 @@ const globalStyle = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: horizontalScale(24),
   },
+  marginBottom24: {
+    marginBottom: verticalScale(24),
+  },
 });
 
 export default globalStyle;
